@@ -114,3 +114,80 @@ func TestTransferTx(t *testing.T) {
 	require.Equal(t, account1.Balance-(int64(maxRetries)*amount), updatedAccount1.Balance)
 	require.Equal(t, account2.Balance+(int64(maxRetries)*amount), updatedAccount2.Balance)
 }
+
+func TestTransferTxDeadlock(t *testing.T) {
+	/*
+		Checking the deadlock transactions, for instance such scenario
+
+		1 user wants to send money to the 2
+		steps:
+			- decrease account from 1
+			- increase account to 2
+
+		But we get the deadlock if this operation handles twice and reversed at the same time
+		Then we get:
+		steps:
+			- decrease account from 1
+			- decrease account from 2
+
+			// HERE IS A DEADLOCK SINCE ONE QUERY IS WAITING FOR ANOTHER ONE AND VICE VERSA
+			- increase account to 2
+			- increase account to 1
+
+
+		SOLUTION: Change order of the second reversed query like that:
+		steps:
+			- decrease amount from 1
+			- increase account to 1
+
+			- increase amount to 2
+			- decrease amount from 2
+
+	*/
+	store := NewStore(testDB)
+	account1 := createRandomAccount(t)
+	account2 := createRandomAccount(t)
+
+	fmt.Println(">>> before:", account1.Balance, account2.Balance)
+
+	// run a concurrent transfer transactions
+	maxRetries := 10
+	amount := int64(10)
+	errs := make(chan error)
+
+	for retries := 0; retries < maxRetries; retries++ {
+		fromAccountID := account1.ID
+		toAccountID := account2.ID
+
+		if retries%2 == 1 {
+			fromAccountID = account2.ID
+			toAccountID = account1.ID
+		}
+		go func() {
+			_, err := store.TransferTx(context.Background(), TransferTxParams{
+				FromAccountID: fromAccountID,
+				ToAccountID:   toAccountID,
+				Amount:        amount,
+			})
+
+			errs <- err
+		}()
+	}
+	// check errors
+
+	for i := 0; i < maxRetries; i++ {
+		err := <-errs
+		require.NoError(t, err)
+	}
+
+	updatedAccount1, err := store.GetAccount(context.Background(), account1.ID)
+	require.NoError(t, err)
+
+	updatedAccount2, err := store.GetAccount(context.Background(), account2.ID)
+	require.NoError(t, err)
+
+	// checking final balance equality
+	fmt.Println(">>> after:", updatedAccount1.Balance, updatedAccount2.Balance)
+	require.Equal(t, account1.Balance, updatedAccount1.Balance)
+	require.Equal(t, account2.Balance, updatedAccount2.Balance)
+}
