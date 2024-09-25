@@ -9,3 +9,8 @@ docker compose --env-file .env.docker up -d
 ```dockerfile
 docker compose --env-file .env.docker down
 ```
+
+### connect to the postgres via docker | password - bank_password_qwertyuiop
+```cmd
+docker exec -it pgdb-bank psql -U bank_admin -d bank_app
+```
