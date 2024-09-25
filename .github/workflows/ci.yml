@@ -1,7 +1,7 @@
 # This workflow will build a golang project
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
 
-name: Go
+name: ci-test
 
 on:
   push:
@@ -11,8 +11,23 @@ on:
 
 jobs:
 
-  build:
+  test:
+    name: Test
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine3.18
+        env:
+          POSTGRES_USER: bank_admin
+          POSTGRES_PASSWORD: bank_password_qwertyuiop
+          POSTGRES_DB: bank_app
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - uses: actions/checkout@v4
 
@@ -21,6 +36,9 @@ jobs:
         with:
           go-version: '1.21'
         id: go
+
+      - name: Run migrations
+        run: make migrate_up
 
       - name: Test
         run: make test
