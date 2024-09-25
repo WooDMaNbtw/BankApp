@@ -22,4 +22,7 @@ sqlc:
 test:
 	go test -v -cover ./...
 
-.PHONY: docker_up docker_down create_db drop_db migrate_up migrate_down sqlc test
+server:
+	go run main.go
+
+.PHONY: docker_up docker_down create_db drop_db migrate_up migrate_down sqlc test server
