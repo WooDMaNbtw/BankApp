@@ -25,4 +25,7 @@ test:
 server:
 	go run main.go
 
-.PHONY: docker_up docker_down create_db drop_db migrate_up migrate_down sqlc test server
+mock:
+	mockgen -package mockdb -destination db/mock/store.go github.com/WooDMaNbtw/BankApp/db/sqlc Store
+
+.PHONY: docker_up docker_down create_db drop_db migrate_up migrate_down sqlc test server mock
