@@ -3,15 +3,14 @@ package api
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 	db "github.com/WooDMaNbtw/BankApp/db/sqlc"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 type listAccountRequest struct {
-	Page  int32 `form:"page"`                   // query parameter
-	Limit int32 `form:"limit" binding:"max=10"` // query parameter
+	Page  int32 `form:"page" binding:"min=0"`         // query parameter
+	Limit int32 `form:"limit" binding:"min=0,max=10"` // query parameter
 }
 
 func (server *Server) listAccount(ctx *gin.Context) {
@@ -33,16 +32,11 @@ func (server *Server) listAccount(ctx *gin.Context) {
 		Offset: (req.Page - 1) * req.Limit, // offset for the first ten records: 1 - 1 * 10 = 0
 	}
 
-	fmt.Println(arg)
-
 	accounts, err := server.store.ListAccounts(ctx, arg)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
-
-	fmt.Println(accounts)
-
 	ctx.JSON(http.StatusOK, accounts)
 }
 
