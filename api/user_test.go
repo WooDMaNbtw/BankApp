@@ -182,7 +182,7 @@ func TestCreateUser(t *testing.T) {
 			tc.buildStubs(store)
 
 			// start tested HTTP server with recorder to read requests
-			server := NewServer(store)
+			server := NewTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
 			// Marshal body data to JSON

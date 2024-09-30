@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	db "github.com/WooDMaNbtw/BankApp/db/sqlc"
+	"github.com/WooDMaNbtw/BankApp/tokens"
 	"github.com/gin-gonic/gin"
 	"github.com/lib/pq"
 	"net/http"
@@ -28,7 +29,9 @@ func (server *Server) listAccount(ctx *gin.Context) {
 		req.Limit = 10
 	}
 
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*tokens.Payload)
 	arg := db.ListAccountsParams{
+		Owner:  authPayload.Username,
 		Limit:  req.Limit,
 		Offset: (req.Page - 1) * req.Limit, // offset for the first ten records: 1 - 1 * 10 = 0
 	}
@@ -44,7 +47,7 @@ func (server *Server) listAccount(ctx *gin.Context) {
 // body parameters for account creation
 type createAccountRequest struct {
 	Owner    string `json:"owner" binding:"required"`
-	Currency string `json:"currency" binding:"required,oneof=USD EUR"`
+	Currency string `json:"currency" binding:"required,oneof=USD EUR CAD JPY"`
 }
 
 func (server *Server) createAccount(ctx *gin.Context) {
@@ -54,8 +57,10 @@ func (server *Server) createAccount(ctx *gin.Context) {
 		return
 	}
 
+	// user can create a new account for exactly his user object
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*tokens.Payload)
 	arg := db.CreateAccountParams{
-		Owner:    req.Owner,
+		Owner:    authPayload.Username,
 		Currency: req.Currency,
 		Balance:  0,
 	}
@@ -98,6 +103,14 @@ func (server *Server) getAccount(ctx *gin.Context) {
 		}
 
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	// User can only have a view access for his own account
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*tokens.Payload)
+	if account.Owner != authPayload.Username {
+		err := errors.New("account doesn't belong to the authenticated user")
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
 		return
 	}
 
