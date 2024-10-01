@@ -29,6 +29,9 @@ jobs:
           - 5433:5432
 
     steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
