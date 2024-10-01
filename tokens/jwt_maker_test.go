@@ -48,7 +48,7 @@ func TestInvalidJWTToken(t *testing.T) {
 	payload, err := NewPayload(utils.RandomOwner(), time.Minute)
 	require.NoError(t, err)
 
-	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
+	jwtToken := jwt.NewWithClaims(jwt.SigningMethodNone, payload)
 	token, err := jwtToken.SignedString(jwt.UnsafeAllowNoneSignatureType)
 	require.NoError(t, err)
 
@@ -56,7 +56,7 @@ func TestInvalidJWTToken(t *testing.T) {
 	require.NoError(t, err)
 
 	payload, err = maker.VerifyToken(token)
-	require.NoError(t, err)
+	require.Error(t, err)
 	require.EqualError(t, err, ErrInvalidToken.Error())
 	require.Nil(t, payload)
 }
