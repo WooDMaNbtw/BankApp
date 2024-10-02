@@ -11,7 +11,7 @@ drop_db:
 	docker exec -it pgdb-bank dropdb --username=bank_admin bank_app
 
 migrate_up:
-	migrate -path db/migrations -database "postgresql://bank_admin:bank_password_qwertyuiop@localhost:5433/bank_app?sslmode=disable" -verbose up
+	migrate -path db/migrations -database "postgresql://bank_admin:bank_password_qwertyuiop@bankapp.cpomksa8kmhk.eu-north-1.rds.amazonaws.com:5432/bank_app" -verbose up
 
 migrate_up1:
 	migrate -path db/migrations -database "postgresql://bank_admin:bank_password_qwertyuiop@localhost:5433/bank_app?sslmode=disable" -verbose up 1
