@@ -1,0 +1,34 @@
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: nginx
+spec:
+  controller: k8s.io/ingress-nginx
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: bank-app-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+spec:
+  ingressClassName: nginx
+  rules:
+#    - host: "ab8c1ff34baca4a779aca38a779f3823-2064767916.eu-north-1.elb.amazonaws.com"
+    - host: "aa7b07ce301284a0a8ddba64ac0fee3f-7f3dbeb7006eb063.elb.eu-north-1.amazonaws.com"
+      http:
+          paths:
+            - pathType: Prefix
+              path: "/"
+              backend:
+                service:
+                  name: bank-app-api-service
+                  port:
+                    number: 80
+
+  tls:
+    - hosts:
+      - "aa7b07ce301284a0a8ddba64ac0fee3f-7f3dbeb7006eb063.elb.eu-north-1.amazonaws.com"
+      secretName: bank-app-api-cert
