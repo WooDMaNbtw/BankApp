@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "title": "Bank API",
-    "version": "1.0",
+    "version": "1.1",
     "contact": {
       "name": "Bank Admin",
       "url": "https://github.com/woodmanbtw",
@@ -23,7 +23,8 @@
   "paths": {
     "/v1/create_user": {
       "post": {
-        "summary": "unary gRPC",
+        "summary": "Create new user",
+        "description": "API for creating a new user",
         "operationId": "BankApp_CreateUser",
         "responses": {
           "200": {
@@ -56,7 +57,8 @@
     },
     "/v1/login_user": {
       "post": {
-        "summary": "unary gRPC",
+        "summary": "Login user",
+        "description": "API for login a user and getting access and refresh tokens",
         "operationId": "BankApp_LoginUser",
         "responses": {
           "200": {

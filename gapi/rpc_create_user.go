@@ -5,11 +5,18 @@ import (
 	db "github.com/WooDMaNbtw/BankApp/db/sqlc"
 	"github.com/WooDMaNbtw/BankApp/pb"
 	"github.com/WooDMaNbtw/BankApp/utils"
+	"github.com/WooDMaNbtw/BankApp/validators"
+	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 func (server *Server) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
+	// validate request arguments
+	violations := ValidateCreateUserRequest(req)
+	if violations != nil {
+		return nil, invalidArgumentError(violations)
+	}
 
 	hashedPassword, err := utils.HashPassword(req.GetPassword())
 	if err != nil {
@@ -37,4 +44,24 @@ func (server *Server) CreateUser(ctx context.Context, req *pb.CreateUserRequest)
 	}
 
 	return response, nil
+}
+
+func ValidateCreateUserRequest(req *pb.CreateUserRequest) (violations []*errdetails.BadRequest_FieldViolation) {
+	if err := validators.ValidateUsername(req.Username); err != nil {
+		violations = append(violations, fieldViolation("username", err))
+	}
+
+	if err := validators.ValidatePassword(req.Password); err != nil {
+		violations = append(violations, fieldViolation("password", err))
+	}
+
+	if err := validators.ValidateFullName(req.FullName); err != nil {
+		violations = append(violations, fieldViolation("full_name", err))
+	}
+
+	if err := validators.ValidateEmail(req.Email); err != nil {
+		violations = append(violations, fieldViolation("email", err))
+	}
+
+	return violations
 }

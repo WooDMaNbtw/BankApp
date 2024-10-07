@@ -27,7 +27,7 @@ option go_package = "github.com/WooDMaNbtw/BankApp/pb";
 option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
   info: {
     title: "Bank API";
-    version: "1.0";
+    version: "1.1";
     contact: {
       name: "Bank Admin";
       url: "https://github.com/woodmanbtw";
@@ -44,12 +44,20 @@ service BankApp {
       post: "/v1/create_user",
       body: "*"
     };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      description: "API for creating a new user";
+      summary: "Create new user";
+    };
   }
   // unary gRPC
   rpc LoginUser (LoginUserRequest) returns (LoginUserResponse) {
     option (google.api.http) = {
       post: "/v1/login_user",
       body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      description: "API for login a user and getting access and refresh tokens";
+      summary: "Login user";
     };
   }
 }
