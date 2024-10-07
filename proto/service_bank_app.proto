@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package pb;
+
+import "rpc_create_user.proto";
+import "rpc_login_user.proto";
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+option go_package = "github.com/WooDMaNbtw/BankApp/pb";
+
+/*
+                            Types of gRPC:
+  1) Unary gPRC:
+    one request from client and response from server
+
+  2) Client streaming gRPC:
+    stream of requests from client and one response from server
+
+  3) Server streaming gRPC:
+    one request from client and stream of responses from server
+
+  4) Bidirectional streaming gRPC:
+    stream of requests from client and stream of responses from server
+*/
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+  info: {
+    title: "Bank API";
+    version: "1.0";
+    contact: {
+      name: "Bank Admin";
+      url: "https://github.com/woodmanbtw";
+      email: "nikita.profatilov@gmail.com";
+    };
+  };
+};
+
+
+service BankApp {
+  // unary gRPC
+  rpc CreateUser (CreateUserRequest) returns (CreateUserResponse) {
+    option (google.api.http) = {
+      post: "/v1/create_user",
+      body: "*"
+    };
+  }
+  // unary gRPC
+  rpc LoginUser (LoginUserRequest) returns (LoginUserResponse) {
+    option (google.api.http) = {
+      post: "/v1/login_user",
+      body: "*"
+    };
+  }
+}
+

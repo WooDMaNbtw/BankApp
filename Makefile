@@ -42,4 +42,17 @@ server:
 mock:
 	mockgen -package mockdb -destination db/mock/store.go github.com/WooDMaNbtw/BankApp/db/sqlc Store
 
-.PHONY: docker_up docker_down create_db drop_db migrate_up migrate_up1 migrate_down migrate_down1 sqlc db_docs db_schema test server mock
+proto:
+	rm -f pb/*.go
+	rm -f docs/swagger/*.swagger.json
+	protoc --proto_path=proto --go_out=pb --go_opt=paths=source_relative \
+	--go-grpc_out=pb --go-grpc_opt=paths=source_relative \
+	--grpc-gateway_out=pb --grpc-gateway_opt=paths=source_relative \
+	--openapiv2_out=docs/swagger --openapiv2_opt=allow_merge=true,merge_file_name=bank_app \
+	proto/*.proto
+	statik -src=./docs/swagger -dest=./docs
+
+evans:
+	evans --host localhost --port 9090 -r repl --package pb
+
+.PHONY: docker_up docker_down create_db drop_db migrate_up migrate_up1 migrate_down migrate_down1 sqlc db_docs db_schema test server mock proto
