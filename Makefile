@@ -24,6 +24,9 @@ migrate_down:
 migrate_down1:
 	migrate -path db/migrations -database "${DB_URL}" -verbose down 1
 
+new_migration:
+	migrate create -ext sql -dir db/migrations -seq ${name}
+
 sqlc:
 	sqlc -f db/sqlc.yaml generate
 
@@ -31,10 +34,10 @@ db_docs:
 	dbdocs build docs/db.html
 
 db_schema:
-	dbml2sql --postgres -o docs/schema.sql docs/db.dbm
+	dbml2sql --postgres -o docs/schema.sql docs/db.dbml
 
 test:
-	go test -v -cover ./...
+	go test -v -cover -short ./...
 
 server:
 	go run main.go
@@ -49,10 +52,18 @@ proto:
 	--go-grpc_out=pb --go-grpc_opt=paths=source_relative \
 	--grpc-gateway_out=pb --grpc-gateway_opt=paths=source_relative \
 	--openapiv2_out=docs/swagger --openapiv2_opt=allow_merge=true,merge_file_name=bank_app \
+	--experimental_allow_proto3_optional \
 	proto/*.proto
 	statik -src=./docs/swagger -dest=./docs
 
 evans:
 	evans --host localhost --port 9090 -r repl --package pb
 
-.PHONY: docker_up docker_down create_db drop_db migrate_up migrate_up1 migrate_down migrate_down1 sqlc db_docs db_schema test server mock proto
+redis:
+	docker run --name redis -p 6375:6379 -d redis:7-alpine
+
+ping_redis:
+	docker exec -it redis redis-cli ping
+
+
+.PHONY: docker_up docker_down create_db drop_db migrate_up migrate_up1 migrate_down migrate_down1 sqlc db_docs db_schema test server mock proto redis ping_redis new_migration

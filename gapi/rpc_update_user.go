@@ -15,11 +15,19 @@ import (
 
 func (server *Server) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.UpdateUserResponse, error) {
 	// TODO: add authorization to protect gRPC API
+	authPayload, err := server.authorizeUser(ctx)
+	if err != nil {
+		return nil, unauthenticatedError(err)
+	}
 
 	// validate request arguments
 	violations := ValidateUpdateUserRequest(req)
 	if violations != nil {
 		return nil, invalidArgumentError(violations)
+	}
+
+	if authPayload.Username != req.GetUsername() {
+		return nil, permissionDeniedError(err)
 	}
 
 	arg := db.UpdateUserParams{
