@@ -7,12 +7,15 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
+      - "9090:9090"
     environment:
       - DB_SOURCE=postgresql://bank_admin:bank_password_qwertyuiop@bank-db:5432/bank_app?sslmode=disable
+      - REDIS_ADDRESS=bank-redis:6379
     networks:
       - bank
     depends_on:
       - bank-db
+      - bank-redis
 
   bank-db:
     image: postgres:16-alpine3.18
@@ -51,6 +54,13 @@ services:
       - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
     networks:
       - bank
+
+  bank-redis:
+    image: redis:7-alpine
+    container_name: bank-redis
+    ports:
+      - "6375:6379"
+
 
 volumes:
   bank_data:

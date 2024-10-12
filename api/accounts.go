@@ -1,7 +1,6 @@
 package api
 
 import (
-	"database/sql"
 	"errors"
 	db "github.com/WooDMaNbtw/BankApp/db/sqlc"
 	"github.com/WooDMaNbtw/BankApp/tokens"
@@ -97,7 +96,7 @@ func (server *Server) getAccount(ctx *gin.Context) {
 	if err != nil {
 
 		// checking if account does not exist
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, db.ErrRecordNotFound) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
@@ -147,7 +146,7 @@ func (server *Server) updateAccount(ctx *gin.Context) {
 	if err != nil {
 
 		// checking if account does not exist
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, db.ErrRecordNotFound) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
@@ -174,7 +173,7 @@ func (server *Server) deleteAccount(ctx *gin.Context) {
 	if err != nil {
 
 		// checking if account does not exist
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, db.ErrRecordNotFound) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}

@@ -5,9 +5,8 @@
 package db
 
 import (
-	"time"
-
 	"github.com/google/uuid"
+	"time"
 )
 
 type Account struct {

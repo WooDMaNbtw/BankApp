@@ -21,6 +21,6 @@ func TestSendEmailWithGmail(t *testing.T) {
 
 	to := []string{"nikita.profatilov5@gmail.com"}
 	attachFiles := []string{"../README.md"}
-	err = sender.SendSubject(subject, content, to, nil, nil, attachFiles)
+	err = sender.SendEmail(subject, content, to, nil, nil, attachFiles)
 	require.NoError(t, err)
 }
