@@ -60,6 +60,7 @@ func randomUser(t *testing.T) (user db.User, password string) {
 	user = db.User{
 		Username:       utils.RandomOwner(),
 		HashedPassword: hashedPassword,
+		Role:           utils.DepositorRole,
 		FullName:       utils.RandomOwner(),
 		Email:          utils.RandomEmail(),
 	}

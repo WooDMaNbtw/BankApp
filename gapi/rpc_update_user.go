@@ -16,7 +16,10 @@ import (
 
 func (server *Server) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.UpdateUserResponse, error) {
 	// TODO: add authorization to protect gRPC API
-	authPayload, err := server.authorizeUser(ctx)
+	authPayload, err := server.authorizeUser(ctx, []string{
+		utils.DepositorRole,
+		utils.BankerRole,
+	})
 	if err != nil {
 		return nil, unauthenticatedError(err)
 	}
@@ -27,7 +30,7 @@ func (server *Server) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest)
 		return nil, invalidArgumentError(violations)
 	}
 
-	if authPayload.Username != req.GetUsername() {
+	if authPayload.Role != utils.BankerRole && authPayload.Username != req.GetUsername() {
 		return nil, permissionDeniedError(err)
 	}
 
@@ -54,7 +57,7 @@ func (server *Server) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest)
 			Valid:  true,
 		}
 
-		arg.PasswordChangedAt = pgtype.Timestamp{
+		arg.PasswordChangedAt = pgtype.Timestamptz{
 			Time:  time.Now(),
 			Valid: true,
 		}
